@@ -42,7 +42,6 @@
     .pixel-cell:active { transform: scale(0.85); }
     .pixel-empty { background-color: #ebd7e3; opacity: 0.4; }
 
-    /* Estilo especial para resaltar HOY */
     .pixel-today {
       box-shadow: 0 0 0 2.5px #b492cd, 0 0 6px rgba(180, 146, 205, 0.8);
       position: relative;
@@ -95,7 +94,17 @@
     </div>
   </header>
 
-  <div class="bg-white/60 backdrop-blur-xs border-b border-[#ebd7e3] px-4 py-2 overflow-x-auto flex space-x-2 sticky top-[57px] z-30" id="trackers-pills-bar">
+  <div class="bg-[#f7f0f4] border-b border-[#ebd7e3] px-4 py-1.5 flex justify-between items-center text-[11px] font-bold text-stone-600">
+    <span>💾 Respaldo:</span>
+    <div class="space-x-2">
+      <button onclick="exportJSON()" class="text-[#b492cd] hover:underline cursor-pointer">📤 Exportar</button>
+      <label class="text-[#5fa89b] hover:underline cursor-pointer">
+        📥 Importar <input type="file" id="import-file" onchange="importJSON(event)" class="hidden" accept=".json">
+      </label>
+    </div>
+  </div>
+
+  <div class="bg-white/60 backdrop-blur-xs border-b border-[#ebd7e3] px-4 py-2 overflow-x-auto flex space-x-2 sticky top-[89px] z-30" id="trackers-pills-bar">
     </div>
 
   <main class="flex-1 max-w-lg mx-auto w-full p-4 space-y-4">
@@ -114,8 +123,7 @@
           </div>
         </div>
 
-        <div id="tracker-keys-container" class="flex flex-wrap gap-1.5 pt-1">
-          </div>
+        <div id="tracker-keys-container" class="flex flex-wrap gap-1.5 pt-1"></div>
       </div>
 
       <div class="glass-card rounded-3xl p-4 space-y-2 overflow-x-auto">
@@ -125,8 +133,7 @@
             <div>J</div><div>F</div><div>M</div><div>A</div><div>M</div><div>J</div>
             <div>J</div><div>A</div><div>S</div><div>O</div><div>N</div><div>D</div>
           </div>
-          <div id="pixel-rows" class="space-y-1">
-            </div>
+          <div id="pixel-rows" class="space-y-1"></div>
         </div>
       </div>
     </section>
@@ -164,8 +171,7 @@
           </div>
         </div>
 
-        <div id="stats-breakdown-container" class="space-y-3 pt-2">
-          </div>
+        <div id="stats-breakdown-container" class="space-y-3 pt-2"></div>
       </div>
     </section>
 
@@ -236,7 +242,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'PIXA_YEAR_IN_PIXELS_V8';
+    const PERMANENT_STORAGE_KEY = 'PIXA_YEAR_IN_PIXELS_PERMANENT_DATA';
     let currentYear = 2026;
     let activeTrackerId = 1;
     let selectedDateForPick = null;
@@ -253,25 +259,6 @@
             { id: 3, label: "8k-10k", color: "#e0a3cc" },
             { id: 4, label: "10k+", color: "#a4dbd0" }
           ],
-          years: { 2026: { "9-15": "#5fa89b", "9-14": "#b492cd" } }
-        },
-        {
-          id: 2,
-          title: "Energía ⚡",
-          keys: [
-            { id: 1, label: "Baja", color: "#b492cd" },
-            { id: 2, label: "Media", color: "#a4dbd0" },
-            { id: 3, label: "Alta", color: "#e0a3cc" }
-          ],
-          years: { 2026: {} }
-        },
-        {
-          id: 3,
-          title: "Agua 💧",
-          keys: [
-            { id: 1, label: "Poco", color: "#ebd7e3" },
-            { id: 2, label: "Bien", color: "#5fa89b" }
-          ],
           years: { 2026: {} }
         }
       ]
@@ -279,13 +266,24 @@
 
     function loadData() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        // SISTEMA DE RECUPERACIÓN AUTOMÁTICA DE DATOS VIEJOS
+        let raw = localStorage.getItem(PERMANENT_STORAGE_KEY);
+        if (!raw) {
+          const oldKeys = ['PIXA_YEAR_IN_PIXELS_DATA_V1', 'PIXA_YEAR_IN_PIXELS_V2', 'PIXA_YEAR_IN_PIXELS_V3', 'PIXA_YEAR_IN_PIXELS_V4', 'PIXA_YEAR_IN_PIXELS_V5', 'PIXA_YEAR_IN_PIXELS_V6', 'PIXA_YEAR_IN_PIXELS_V7', 'PIXA_YEAR_IN_PIXELS_V8', 'PIXA_YEAR_IN_PIXELS_V9'];
+          for (let k of oldKeys) {
+            raw = localStorage.getItem(k);
+            if (raw) {
+              localStorage.setItem(PERMANENT_STORAGE_KEY, raw);
+              break;
+            }
+          }
+        }
         if (raw) pixaData = JSON.parse(raw);
       } catch (e) {}
     }
 
     function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(pixaData));
+      localStorage.setItem(PERMANENT_STORAGE_KEY, JSON.stringify(pixaData));
     }
 
     function showToast(msg) {
@@ -673,13 +671,46 @@
                   <span class="w-3 h-3 rounded-md" style="background-color: ${item.color}"></span>
                   <span class="font-black text-stone-800">${item.label}</span>
                 </div>
-                <span class="font-black text-stone-600">${item.count} días <span class="text-stone-400 font-bold">(${pct}%)</span></span>
+                <span class="font-black text-stone-600">${item.count} días <span class="text-stone-400 font-bold">(${pct}%)</span>*/</span>
               </div>
               <div class="w-full bg-[#f0e6ed] h-2 rounded-full overflow-hidden">
                 <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background-color: ${item.color}"></div>
               </div>
             </div>`;
         });
+      }
+    }
+
+    function exportJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(pixaData));
+      const dlAnchorElem = document.createElement('a');
+      dlAnchorElem.setAttribute("href", dataStr);
+      dlAnchorElem.setAttribute("download", `pixa_respaldo_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(dlAnchorElem);
+      dlAnchorElem.click();
+      dlAnchorElem.remove();
+      showToast("📥 ¡Respaldo descargado!");
+    }
+
+    function importJSON(event) {
+      const fileReader = new FileReader();
+      if (event.target.files[0]) {
+        fileReader.readAsText(event.target.files[0], "UTF-8");
+        fileReader.onload = (e) => {
+          try {
+            const parsed = JSON.parse(e.target.result);
+            if (parsed && parsed.trackers) {
+              pixaData = parsed;
+              saveData();
+              renderAll();
+              showToast("✨ ¡Datos restaurados!");
+            } else {
+              alert("El archivo no tiene el formato correcto.");
+            }
+          } catch (error) {
+            alert("Error al leer el archivo.");
+          }
+        }
       }
     }
 
