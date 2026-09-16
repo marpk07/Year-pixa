@@ -236,7 +236,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'PIXA_YEAR_IN_PIXELS_V7';
+    const STORAGE_KEY = 'PIXA_YEAR_IN_PIXELS_V8';
     let currentYear = 2026;
     let activeTrackerId = 1;
     let selectedDateForPick = null;
@@ -373,3 +373,317 @@
       pixaData.trackers.forEach(t => {
         const isActive = t.id === activeTrackerId;
         bar.innerHTML += `
+          <button onclick="setActiveTracker(${t.id})" class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition cursor-pointer ${isActive ? 'bg-[#b492cd] text-white shadow-xs' : 'bg-white text-stone-600 border border-[#ebd7e3]'}" style="${isActive ? '' : ''}">
+            ${t.title}
+          </button>`;
+      });
+    }
+
+    function setActiveTracker(id) {
+      activeTrackerId = id;
+      renderAll();
+    }
+
+    function renderActiveTrackerView() {
+      const tracker = pixaData.trackers.find(t => t.id === activeTrackerId);
+      if (!tracker) return;
+
+      const titleInput = document.getElementById('active-tracker-title');
+      if(titleInput) titleInput.value = tracker.title;
+      
+      const yearLog = (tracker.years && tracker.years[currentYear]) || {};
+      const filledCount = Object.keys(yearLog).length;
+      const countEl = document.getElementById('active-tracker-count');
+      if(countEl) countEl.innerText = `${filledCount} días registrados`;
+
+      const keysContainer = document.getElementById('tracker-keys-container');
+      if(keysContainer) {
+        keysContainer.innerHTML = '';
+        tracker.keys.forEach(k => {
+          keysContainer.innerHTML += `
+            <div class="flex items-center space-x-1.5 bg-white px-2 py-0.5 rounded-xl border border-[#ebd7e3] text-[11px] font-black text-stone-700 shadow-xs">
+              <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${k.color}"></span>
+              <span>${k.label}</span>
+              <button onclick="deleteKey(${k.id})" class="text-stone-300 hover:text-red-400 font-bold ml-1 cursor-pointer">×</button>
+            </div>`;
+        });
+      }
+
+      const rowsContainer = document.getElementById('pixel-rows');
+      if(!rowsContainer) return;
+      rowsContainer.innerHTML = '';
+
+      if (!tracker.years) tracker.years = {};
+      if (!tracker.years[currentYear]) tracker.years[currentYear] = {};
+
+      const now = new Date();
+      const realYear = now.getFullYear();
+      const realMonth = now.getMonth() + 1;
+      const realDay = now.getDate();
+
+      for (let day = 1; day <= 31; day++) {
+        let rowHtml = `<div style="display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 3px; align-items: center;">`;
+        rowHtml += `<div class="text-[9px] font-black text-stone-400 text-right pr-1">${day}</div>`;
+
+        for (let month = 1; month <= 12; month++) {
+          const daysInMonth = new Date(currentYear, month, 0).getDate();
+          if (day > daysInMonth) {
+            rowHtml += `<div class="pixel-cell opacity-0 pointer-events-none"></div>`;
+          } else {
+            const dateKey = `${month}-${day}`;
+            const color = yearLog[dateKey] || '';
+            const style = color ? `background-color: ${color};` : '';
+            
+            const isToday = (currentYear === realYear && month === realMonth && day === realDay);
+            const todayClass = isToday ? 'pixel-today' : '';
+            const bgClass = color ? '' : 'pixel-empty';
+
+            rowHtml += `
+              <div onclick="openPickColorModal(${month}, ${day})" 
+                   class="pixel-cell ${bgClass} ${todayClass}" 
+                   style="${style}" 
+                   title="${day}/${month}/${currentYear} ${isToday ? '(Hoy)' : ''}">
+              </div>`;
+          }
+        }
+        rowHtml += `</div>`;
+        rowsContainer.innerHTML += rowHtml;
+      }
+    }
+
+    function updateTrackerTitle(val) {
+      const tracker = pixaData.trackers.find(t => t.id === activeTrackerId);
+      if (tracker && val.trim()) {
+        tracker.title = val.trim();
+        saveData();
+        renderPillsBar();
+        showToast("✨ Título actualizado");
+      }
+    }
+
+    function deleteCurrentTracker() {
+      if (pixaData.trackers.length <= 1) {
+        alert("Debes tener al menos un log.");
+        return;
+      }
+      if (confirm("¿Segura que deseas eliminar este log?")) {
+        pixaData.trackers = pixaData.trackers.filter(t => t.id !== activeTrackerId);
+        activeTrackerId = pixaData.trackers[0].id;
+        saveData();
+        renderAll();
+        showToast("🗑️ Log eliminado");
+      }
+    }
+
+    function openNewTrackerModal() {
+      const input = document.getElementById('new-tracker-name');
+      if(input) input.value = '';
+      openModal('modal-new-tracker');
+    }
+
+    function createNewTracker() {
+      const input = document.getElementById('new-tracker-name');
+      const name = input ? input.value.trim() : '';
+      if (!name) return;
+      const newId = Date.now();
+      pixaData.trackers.push({
+        id: newId,
+        title: name,
+        keys: [
+          { id: 1, label: "Nivel 1", color: "#b492cd" },
+          { id: 2, label: "Nivel 2", color: "#5fa89b" }
+        ],
+        years: { [currentYear]: {} }
+      });
+      saveData();
+      closeModal('modal-new-tracker');
+      activeTrackerId = newId;
+      renderAll();
+      showToast("✨ ¡Nuevo log creado!");
+    }
+
+    function openAddKeyModal() {
+      const input = document.getElementById('key-input-label');
+      if(input) input.value = '';
+      openModal('modal-key-edit');
+    }
+
+    function saveKeyItem() {
+      const input = document.getElementById('key-input-label');
+      const label = input ? input.value.trim() : '';
+      const colorInput = document.getElementById('key-input-color');
+      const color = colorInput ? colorInput.value : '#b492cd';
+      if (!label) return;
+
+      const tracker = pixaData.trackers.find(t => t.id === activeTrackerId);
+      if (tracker) {
+        tracker.keys.push({ id: Date.now(), label, color });
+        saveData();
+        closeModal('modal-key-edit');
+        renderActiveTrackerView();
+        showToast("✨ Categoría guardada");
+      }
+    }
+
+    function deleteKey(keyId) {
+      const tracker = pixaData.trackers.find(t => t.id === activeTrackerId);
+      if (tracker) {
+        tracker.keys = tracker.keys.filter(k => k.id !== keyId);
+        saveData();
+        renderActiveTrackerView();
+        showToast("🗑️ Categoría eliminada");
+      }
+    }
+
+    function openPickColorModal(m, d) {
+      selectedDateForPick = `${m}-${d}`;
+      const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+      const dateLabel = document.getElementById('pick-date-label');
+      if(dateLabel) dateLabel.innerText = `${d} de ${monthNames[m-1]} ${currentYear}`;
+
+      const tracker = pixaData.trackers.find(t => t.id === activeTrackerId);
+      const list = document.getElementById('modal-keys-list');
+      if(!list) return;
+      list.innerHTML = '';
+
+      if (!tracker || tracker.keys.length === 0) {
+        list.innerHTML = `<p class="text-xs text-stone-400 text-center py-2">Agrega primero una categoría con "+ Color"</p>`;
+      } else {
+        tracker.keys.forEach(k => {
+          list.innerHTML += `
+            <div onclick="applyColorToDay('${k.color}')" class="flex items-center space-x-3 p-2.5 bg-[#f7faf8] hover:bg-stone-100 rounded-2xl cursor-pointer border border-[#e2ede7] transition">
+              <span class="w-5 h-5 rounded-lg shadow-xs" style="background-color: ${k.color}"></span>
+              <span class="text-xs font-black text-stone-800">${k.label}</span>
+            </div>`;
+        });
+      }
+
+      openModal('modal-pick-color');
+    }
+
+    function applyColorToDay(color) {
+      const tracker = pixaData.trackers.find(t => t.id === activeTrackerId);
+      if (tracker && selectedDateForPick) {
+        if (!tracker.years[currentYear]) tracker.years[currentYear] = {};
+        tracker.years[currentYear][selectedDateForPick] = color;
+        saveData();
+        closeModal('modal-pick-color');
+        renderActiveTrackerView();
+        showToast("✨ ¡Guardado con éxito!");
+      }
+    }
+
+    function clearPixelDay() {
+      const tracker = pixaData.trackers.find(t => t.id === activeTrackerId);
+      if (tracker && selectedDateForPick && tracker.years[currentYear]) {
+        delete tracker.years[currentYear][selectedDateForPick];
+        saveData();
+        closeModal('modal-pick-color');
+        renderActiveTrackerView();
+        showToast("🗑️ Día borrado");
+      }
+    }
+
+    // --- ESTADÍSTICAS & GRÁFICOS (DONA + BARRAS) ---
+    function renderStats() {
+      const fromEl = document.getElementById('stats-from');
+      const toEl = document.getElementById('stats-to');
+      if(!fromEl || !toEl) return;
+      const fromStr = fromEl.value;
+      const toStr = toEl.value;
+      
+      const donutContainer = document.getElementById('donut-chart-container');
+      const breakdownContainer = document.getElementById('stats-breakdown-container');
+      const badge = document.getElementById('stats-total-logged-badge');
+      const titleEl = document.getElementById('stats-tracker-name-title');
+
+      const tracker = pixaData.trackers.find(t => t.id === activeTrackerId);
+      if (!tracker) return;
+
+      if(titleEl) titleEl.innerText = tracker.title;
+      if(breakdownContainer) breakdownContainer.innerHTML = '';
+
+      const yearLog = (tracker.years && tracker.years[currentYear]) || {};
+
+      let totalDaysInRange = 0;
+      let loggedDaysInRange = 0;
+      let colorCounts = {};
+
+      tracker.keys.forEach(k => colorCounts[k.color] = { label: k.label, count: 0, color: k.color });
+
+      if (fromStr && toStr) {
+        let curr = new Date(fromStr + 'T00:00:00');
+        let end = new Date(toStr + 'T00:00:00');
+
+        while (curr <= end) {
+          totalDaysInRange++;
+          const m = curr.getMonth() + 1;
+          const d = curr.getDate();
+          const dateKey = `${m}-${d}`;
+          const col = yearLog[dateKey];
+
+          if (col) {
+            loggedDaysInRange++;
+            if (colorCounts[col]) colorCounts[col].count++;
+          }
+          curr.setDate(curr.getDate() + 1);
+        }
+      }
+
+      if(badge) badge.innerText = `${loggedDaysInRange} regs.`;
+
+      if (loggedDaysInRange === 0) {
+        if(donutContainer) donutContainer.style.background = '#ebd7e3';
+        const centerPct = document.getElementById('donut-center-pct');
+        if(centerPct) centerPct.innerText = '0%';
+        if(breakdownContainer) breakdownContainer.innerHTML = `<p class="text-xs text-stone-400 text-center py-4">No hay píxeles pintados en este rango de fechas.</p>`;
+        return;
+      }
+
+      let gradientStops = [];
+      let currentDeg = 0;
+
+      Object.values(colorCounts).forEach(item => {
+        if (item.count > 0) {
+          const angle = (item.count / loggedDaysInRange) * 360;
+          const nextDeg = currentDeg + angle;
+          gradientStops.push(`${item.color} ${currentDeg}deg ${nextDeg}deg`);
+          currentDeg = nextDeg;
+        }
+      });
+
+      if (donutContainer) {
+        if (gradientStops.length > 0) {
+          donutContainer.style.background = `conic-gradient(${gradientStops.join(', ')})`;
+        } else {
+          donutContainer.style.background = '#ebd7e3';
+        }
+      }
+
+      const centerPct = document.getElementById('donut-center-pct');
+      if(centerPct) centerPct.innerText = `${loggedDaysInRange}d`;
+
+      if(breakdownContainer) {
+        Object.values(colorCounts).forEach(item => {
+          const pct = ((item.count / loggedDaysInRange) * 100).toFixed(1);
+          breakdownContainer.innerHTML += `
+            <div class="space-y-1.5 text-xs bg-white/60 p-3 rounded-2xl border border-[#ebd7e3]">
+              <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-md" style="background-color: ${item.color}"></span>
+                  <span class="font-black text-stone-800">${item.label}</span>
+                </div>
+                <span class="font-black text-stone-600">${item.count} días <span class="text-stone-400 font-bold">(${pct}%)</span></span>
+              </div>
+              <div class="w-full bg-[#f0e6ed] h-2 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background-color: ${item.color}"></div>
+              </div>
+            </div>`;
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
