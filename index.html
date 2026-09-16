@@ -276,7 +276,8 @@
       db = firebase.firestore();
     } catch(e) { console.warn("Firebase error:", e); }
 
-    const STORAGE_KEY = 'PIXA_FIRESTORE_DATA_V1';
+    const STORAGE_KEY = 'PIXA_FIRESTORE_DATA_V2';
+    const PERMANENT_STORAGE_KEY = 'PIXA_YEAR_IN_PIXELS_PERMANENT_DATA';
     let currentYear = 2026;
     let activeTrackerId = 1;
     let selectedDateForPick = null;
@@ -300,18 +301,39 @@
 
     function loadData() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) pixaData = JSON.parse(raw);
+        let raw = localStorage.getItem(PERMANENT_STORAGE_KEY) || localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          const oldKeys = [
+            'PIXA_YEAR_IN_PIXELS_PERMANENT_DATA',
+            'PIXA_YEAR_IN_PIXELS_V1', 'PIXA_YEAR_IN_PIXELS_V2', 'PIXA_YEAR_IN_PIXELS_V3', 
+            'PIXA_YEAR_IN_PIXELS_V4', 'PIXA_YEAR_IN_PIXELS_V5', 'PIXA_YEAR_IN_PIXELS_V6', 
+            'PIXA_YEAR_IN_PIXELS_V7', 'PIXA_YEAR_IN_PIXELS_V8', 'PIXA_YEAR_IN_PIXELS_V9',
+            'PIXA_YEAR_IN_PIXELS_V10', 'PIXA_YEAR_IN_PIXELS_V11'
+          ];
+          for (let k of oldKeys) {
+            raw = localStorage.getItem(k);
+            if (raw) {
+              pixaData = JSON.parse(raw);
+              break;
+            }
+          }
+        } else {
+          pixaData = JSON.parse(raw);
+        }
       } catch (e) {}
 
       if (db) {
         db.collection('mary_pixa').doc('main_data').onSnapshot((doc) => {
           if (doc.exists) {
             const val = doc.data();
-            if (val && val.trackers) {
+            if (val && val.trackers && val.trackers.length > 0) {
               pixaData = val;
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(pixaData));
+              localStorage.setItem(PERMANENT_STORAGE_KEY, JSON.stringify(pixaData));
               renderAll();
+            }
+          } else {
+            if (pixaData && pixaData.trackers && pixaData.trackers.length > 0) {
+              saveData();
             }
           }
         });
@@ -319,6 +341,7 @@
     }
 
     function saveData() {
+      localStorage.setItem(PERMANENT_STORAGE_KEY, JSON.stringify(pixaData));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(pixaData));
       if (db) {
         db.collection('mary_pixa').doc('main_data').set(pixaData)
