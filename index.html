@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PIXA · Year in Pixels</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDKs (Firestore) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2225%22 fill=%22%23b492cd%22/><text x=%2250%22 y=%2255%22 font-size=%2250%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>🌸</text></svg>">
 
   <style>
@@ -76,6 +80,7 @@
 </head>
 <body class="flex flex-col antialiased">
 
+  <!-- TOP BAR -->
   <header class="sticky top-0 bg-white/95 backdrop-blur-md z-40 px-4 py-3 border-b border-[#ebd7e3] flex items-center justify-between">
     <div class="flex items-center space-x-2">
       <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#b492cd] to-[#d9a7c7] flex items-center justify-center text-xs shadow-sm">🌸</div>
@@ -94,19 +99,15 @@
     </div>
   </header>
 
-  <div class="bg-[#f7f0f4] border-b border-[#ebd7e3] px-4 py-1.5 flex justify-between items-center text-[11px] font-bold text-stone-600">
-    <span>💾 Sincronización Celular ⇄ PC:</span>
-    <div class="space-x-3">
-      <button onclick="openExportModal()" class="text-[#b492cd] hover:underline cursor-pointer">📤 Copiar Datos</button>
-      <button onclick="openImportModal()" class="text-[#5fa89b] hover:underline cursor-pointer">📥 Pegar Datos</button>
-    </div>
+  <!-- SELECTOR DE TRACKERS (CARRUSEL SUPERIOR) -->
+  <div class="bg-white/60 backdrop-blur-xs border-b border-[#ebd7e3] px-4 py-2 overflow-x-auto flex space-x-2 sticky top-[57px] z-30" id="trackers-pills-bar">
+    <!-- Generado por JS -->
   </div>
 
-  <div class="bg-white/60 backdrop-blur-xs border-b border-[#ebd7e3] px-4 py-2 overflow-x-auto flex space-x-2 sticky top-[89px] z-30" id="trackers-pills-bar">
-    </div>
-
+  <!-- CONTENEDOR PRINCIPAL -->
   <main class="flex-1 max-w-lg mx-auto w-full p-4 space-y-4">
 
+    <!-- VISTA 1: GRILLA DE PÍXELES -->
     <section id="view-pixels" class="space-y-4">
       <div class="glass-card rounded-3xl p-4 space-y-3">
         <div class="flex items-center justify-between pb-2 border-b border-[#ebd7e3]">
@@ -121,9 +122,13 @@
           </div>
         </div>
 
-        <div id="tracker-keys-container" class="flex flex-wrap gap-1.5 pt-1"></div>
+        <!-- Leyenda de colores -->
+        <div id="tracker-keys-container" class="flex flex-wrap gap-1.5 pt-1">
+          <!-- Generado por JS -->
+        </div>
       </div>
 
+      <!-- TABLA ANUAL COMPLETA -->
       <div class="glass-card rounded-3xl p-4 space-y-2 overflow-x-auto">
         <div class="min-w-[320px]">
           <div style="display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 3px; align-items: center;" class="text-center text-[10px] font-black text-stone-400 mb-1">
@@ -131,11 +136,14 @@
             <div>J</div><div>F</div><div>M</div><div>A</div><div>M</div><div>J</div>
             <div>J</div><div>A</div><div>S</div><div>O</div><div>N</div><div>D</div>
           </div>
-          <div id="pixel-rows" class="space-y-1"></div>
+          <div id="pixel-rows" class="space-y-1">
+            <!-- 31 filas generadas por JS -->
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- VISTA 2: ESTADÍSTICAS VISUALES (TORTAS Y BARRAS) -->
     <section id="view-stats" class="space-y-4 hidden">
       <div class="glass-card rounded-3xl p-4 space-y-3">
         <h3 class="text-xs font-black uppercase tracking-wider text-stone-700">📊 Resumen y Gráficos</h3>
@@ -151,6 +159,7 @@
         </div>
       </div>
 
+      <!-- TARJETA DE GRÁFICO TIPO DONA / TORTA Y MÉTRICAS -->
       <div class="glass-card rounded-3xl p-5 space-y-4">
         <div class="flex items-center justify-between">
           <div>
@@ -160,6 +169,7 @@
           <span id="stats-total-logged-badge" class="px-2.5 py-1 bg-[#f7f0f4] text-[#b492cd] rounded-xl text-xs font-black">0 días reg.</span>
         </div>
 
+        <!-- Gráfico Dona / Torta central -->
         <div class="flex flex-col items-center justify-center py-2">
           <div id="donut-chart-container" class="relative w-32 h-32 rounded-full flex items-center justify-center shadow-inner">
             <div class="donut-hole absolute flex flex-col items-center justify-center shadow-xs">
@@ -169,12 +179,16 @@
           </div>
         </div>
 
-        <div id="stats-breakdown-container" class="space-y-3 pt-2"></div>
+        <!-- Desglose con Barras de Progreso -->
+        <div id="stats-breakdown-container" class="space-y-3 pt-2">
+          <!-- Generado por JS -->
+        </div>
       </div>
     </section>
 
   </main>
 
+  <!-- BARRA DE NAVEGACIÓN INFERIOR (TIPO APP) -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-[#ebd7e3] p-2 flex justify-around items-center z-50 shadow-lg">
     <button onclick="switchMainTab('pixels')" id="nav-tab-pixels" class="nav-tab active flex-1 py-2 rounded-2xl text-xs font-bold text-stone-600 flex flex-col items-center justify-center cursor-pointer">
       <span>🟩 Píxeles</span>
@@ -184,34 +198,12 @@
     </button>
   </nav>
 
+  <!-- TOAST DE CONFIRMACIÓN -->
   <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 bg-[#3d2c3d] text-white px-4 py-2 rounded-2xl shadow-xl text-xs font-bold transition-all duration-300 opacity-0 pointer-events-none">
     ✨ ¡Guardado con éxito!
   </div>
 
-  <div id="modal-export" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-5 space-y-3 shadow-2xl border border-[#ebd7e3]">
-      <h3 class="text-sm font-black text-stone-800 text-center">📤 Copiar tus datos</h3>
-      <p class="text-[11px] text-stone-500 text-center">Copia este código y mándatelo por WhatsApp o correo a tu computadora:</p>
-      <textarea id="export-textarea" class="w-full h-32 bg-[#f7faf8] border border-[#ebd7e3] rounded-2xl p-2 text-[10px] font-mono text-stone-700 outline-none resize-none" readonly></textarea>
-      <div class="flex justify-between pt-2">
-        <button onclick="closeModal('modal-export')" class="px-4 py-1.5 bg-stone-100 rounded-xl text-xs font-bold text-stone-700 cursor-pointer">Cerrar</button>
-        <button onclick="copyExportText()" class="px-4 py-1.5 bg-[#b492cd] text-white rounded-xl text-xs font-black cursor-pointer">📋 Copiar al Portapapeles</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-import" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-5 space-y-3 shadow-2xl border border-[#ebd7e3]">
-      <h3 class="text-sm font-black text-stone-800 text-center">📥 Pegar tus datos</h3>
-      <p class="text-[11px] text-stone-500 text-center">Pega aquí el código que trajiste de tu otro dispositivo:</p>
-      <textarea id="import-textarea" placeholder="Pega el código JSON aquí..." class="w-full h-32 bg-[#f7faf8] border border-[#ebd7e3] rounded-2xl p-2 text-[10px] font-mono text-stone-700 outline-none resize-none"></textarea>
-      <div class="flex justify-between pt-2">
-        <button onclick="closeModal('modal-import')" class="px-4 py-1.5 bg-stone-100 rounded-xl text-xs font-bold text-stone-700 cursor-pointer">Cancelar</button>
-        <button onclick="applyImportText()" class="px-4 py-1.5 bg-[#5fa89b] text-white rounded-xl text-xs font-black cursor-pointer">✨ Restaurar Datos</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- MODAL: PINTAR PÍXEL -->
   <div id="modal-pick-color" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl border border-[#ebd7e3]">
       <div class="text-center">
@@ -226,6 +218,7 @@
     </div>
   </div>
 
+  <!-- MODAL: NUEVA CATEGORÍA (COLOR) -->
   <div id="modal-key-edit" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl border border-[#ebd7e3]">
       <h3 class="text-sm font-black text-stone-800 text-center">Nueva Categoría</h3>
@@ -249,6 +242,7 @@
     </div>
   </div>
 
+  <!-- MODAL: NUEVO TRACKER -->
   <div id="modal-new-tracker" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl border border-[#ebd7e3]">
       <h3 class="text-sm font-black text-stone-800 text-center">Nuevo Registro</h3>
@@ -263,8 +257,26 @@
     </div>
   </div>
 
+  <!-- SCRIPT -->
   <script>
-    const PERMANENT_STORAGE_KEY = 'PIXA_YEAR_IN_PIXELS_PERMANENT_DATA';
+    // Configuración Firebase Firestore con tus credenciales reales
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnhvfyXpwJdYOQFCvsyHDhgW9F3X7ARR4",
+      authDomain: "marpk-816dd.firebaseapp.com",
+      databaseURL: "https://marpk-816dd-default-rtdb.firebaseio.com",
+      projectId: "marpk-816dd",
+      storageBucket: "marpk-816dd.firebasestorage.app",
+      messagingSenderId: "189644122232",
+      appId: "1:189644122232:web:ed7894f1510a373d44658d"
+    };
+
+    let db = null;
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+    } catch(e) { console.warn("Firebase error:", e); }
+
+    const STORAGE_KEY = 'PIXA_FIRESTORE_DATA_V1';
     let currentYear = 2026;
     let activeTrackerId = 1;
     let selectedDateForPick = null;
@@ -288,72 +300,29 @@
 
     function loadData() {
       try {
-        let raw = localStorage.getItem(PERMANENT_STORAGE_KEY);
-        if (!raw) {
-          const oldKeys = ['PIXA_YEAR_IN_PIXELS_DATA_V1', 'PIXA_YEAR_IN_PIXELS_V2', 'PIXA_YEAR_IN_PIXELS_V3', 'PIXA_YEAR_IN_PIXELS_V4', 'PIXA_YEAR_IN_PIXELS_V5', 'PIXA_YEAR_IN_PIXELS_V6', 'PIXA_YEAR_IN_PIXELS_V7', 'PIXA_YEAR_IN_PIXELS_V8', 'PIXA_YEAR_IN_PIXELS_V9'];
-          for (let k of oldKeys) {
-            raw = localStorage.getItem(k);
-            if (raw) {
-              localStorage.setItem(PERMANENT_STORAGE_KEY, raw);
-              break;
-            }
-          }
-        }
+        const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) pixaData = JSON.parse(raw);
       } catch (e) {}
-    }
 
-    function saveData() {
-      localStorage.setItem(PERMANENT_STORAGE_KEY, JSON.stringify(pixaData));
-    }
-
-    function openExportModal() {
-      const txt = document.getElementById('export-textarea');
-      if (txt) {
-        txt.value = JSON.stringify(pixaData);
-        openModal('modal-export');
-      }
-    }
-
-    function copyExportText() {
-      const txt = document.getElementById('export-textarea');
-      if (txt) {
-        txt.select();
-        txt.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(txt.value).then(() => {
-          showToast("📋 ¡Copiado al portapapeles!");
-          closeModal('modal-export');
-        }).catch(() => {
-          alert("Selecciona el texto y cópialo manualmente.");
+      if (db) {
+        db.collection('mary_pixa').doc('main_data').onSnapshot((doc) => {
+          if (doc.exists) {
+            const val = doc.data();
+            if (val && val.trackers) {
+              pixaData = val;
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(pixaData));
+              renderAll();
+            }
+          }
         });
       }
     }
 
-    function openImportModal() {
-      const txt = document.getElementById('import-textarea');
-      if (txt) txt.value = '';
-      openModal('modal-import');
-    }
-
-    function applyImportText() {
-      const txt = document.getElementById('import-textarea');
-      if (!txt || !txt.value.trim()) {
-        alert("Por favor pega el código primero.");
-        return;
-      }
-      try {
-        const parsed = JSON.parse(txt.value.trim());
-        if (parsed && parsed.trackers) {
-          pixaData = parsed;
-          saveData();
-          renderAll();
-          closeModal('modal-import');
-          showToast("✨ ¡Datos restaurados con éxito!");
-        } else {
-          alert("El código no tiene el formato correcto de Pixa.");
-        }
-      } catch (e) {
-        alert("El texto pegado no es un código válido.");
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(pixaData));
+      if (db) {
+        db.collection('mary_pixa').doc('main_data').set(pixaData)
+          .catch(err => console.log("Error en Firestore:", err));
       }
     }
 
