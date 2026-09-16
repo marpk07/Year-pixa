@@ -21,12 +21,13 @@
 
     .pixel-cell {
       width: 100%;
-      max-width: 20px;
-      max-height: 20px;
+      max-width: 22px;
+      max-height: 22px;
       aspect-ratio: 1 / 1;
-      border-radius: 3px;
+      border-radius: 4px;
       margin: 0 auto;
       transition: transform 0.1s ease;
+      cursor: pointer;
     }
     .pixel-cell:active {
       transform: scale(0.85);
@@ -36,7 +37,7 @@
     }
 
     .modal-overlay {
-      background-color: rgba(44, 62, 53, 0.4);
+      background-color: rgba(44, 62, 53, 0.45);
       backdrop-filter: blur(4px);
     }
 
@@ -45,9 +46,10 @@
 </head>
 <body class="flex flex-col antialiased">
 
-  <header class="sticky top-0 bg-[#f7faf8]/95 backdrop-blur-md z-30 px-4 py-3 border-b border-[#e2ede7] flex items-center justify-between">
+  <!-- TOP BAR -->
+  <header class="sticky top-0 bg-[#f7faf8] z-50 px-4 py-3 border-b border-[#e2ede7] flex items-center justify-between">
     <div class="flex items-center space-x-2">
-      <button id="btn-back" onclick="goHome()" class="hidden text-stone-500 font-extrabold text-lg mr-1">‹</button>
+      <button id="btn-back" onclick="goHome()" class="hidden text-stone-600 font-black text-xl mr-1 cursor-pointer">‹</button>
       <div class="flex items-center space-x-1.5">
         <span class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-xs">🟩</span>
         <h1 class="text-sm font-black tracking-wide text-stone-800" id="header-title">PIXA</h1>
@@ -55,57 +57,68 @@
     </div>
 
     <div class="flex items-center space-x-3 text-xs font-bold text-stone-600">
-      <div class="flex items-center space-x-1 bg-white px-2 py-1 rounded-xl border border-[#e2ede7] shadow-xs">
-        <button onclick="changeYear(-1)" class="px-1 text-stone-400 font-black">‹</button>
+      <div class="flex items-center space-x-1 bg-white px-2.5 py-1 rounded-xl border border-[#e2ede7] shadow-xs">
+        <button onclick="changeYear(-1)" class="px-1 text-stone-400 font-black cursor-pointer">‹</button>
         <span id="current-year-label" class="font-black text-stone-800">2026</span>
-        <button onclick="changeYear(1)" class="px-1 text-stone-400 font-black">›</button>
+        <button onclick="changeYear(1)" class="px-1 text-stone-400 font-black cursor-pointer">›</button>
       </div>
-      <button id="btn-toggle-view" onclick="toggleViewMode()" class="hidden bg-white px-2.5 py-1 rounded-xl border border-[#e2ede7] shadow-xs">📅</button>
+      <button id="btn-toggle-view" onclick="toggleViewMode()" class="hidden bg-white px-2.5 py-1 rounded-xl border border-[#e2ede7] shadow-xs cursor-pointer">📅</button>
     </div>
   </header>
 
+  <!-- CONTENEDOR PRINCIPAL -->
   <main class="flex-1 max-w-lg mx-auto w-full p-4">
 
+    <!-- PANTALLA 1: LISTA DE LOGS / TRACKERS -->
     <section id="screen-home" class="space-y-4">
       <div class="flex justify-between items-center">
         <h2 class="text-xs font-black uppercase tracking-wider text-stone-500">Mis Registros en Píxeles</h2>
-        <button onclick="openNewTrackerModal()" class="px-3 py-1 bg-[#5fa89b] text-white rounded-xl text-xs font-black shadow-sm">+ Nuevo Log</button>
+        <button onclick="openNewTrackerModal()" class="px-3.5 py-1.5 bg-[#5fa89b] text-white rounded-xl text-xs font-black shadow-sm cursor-pointer">+ Nuevo Log</button>
       </div>
 
       <div id="trackers-grid" class="grid grid-cols-2 gap-3">
-        </div>
+        <!-- Renderizado dinámico -->
+      </div>
     </section>
 
+    <!-- PANTALLA 2: VISTA DETALLE DEL TRACKER -->
     <section id="screen-detail" class="hidden space-y-4">
       <div class="flex items-center justify-between">
         <input type="text" id="detail-title" onchange="updateTrackerTitle(this.value)" class="bg-transparent text-lg font-black text-stone-800 outline-none w-2/3">
         <div class="flex items-center space-x-2">
-          <button onclick="openAddKeyModal()" class="px-2.5 py-1 bg-white border border-[#e2ede7] rounded-xl text-xs font-bold text-stone-700 shadow-xs">+ Color</button>
-          <button onclick="deleteCurrentTracker()" class="text-red-400 font-bold text-xs p-1">🗑️</button>
+          <button onclick="openAddKeyModal()" class="px-2.5 py-1.5 bg-white border border-[#e2ede7] rounded-xl text-xs font-bold text-stone-700 shadow-xs cursor-pointer">+ Color</button>
+          <button onclick="deleteCurrentTracker()" class="text-red-400 font-bold text-xs p-1.5 cursor-pointer">🗑️</button>
         </div>
       </div>
 
+      <!-- Leyenda de colores -->
       <div id="tracker-keys-container" class="flex flex-wrap gap-2 pt-1 pb-2">
-        </div>
+        <!-- Renderizado dinámico -->
+      </div>
 
-      <div id="view-pixel-grid" class="bg-white p-3.5 rounded-3xl border border-[#e2ede7] shadow-xs space-y-2 overflow-x-auto">
-        <div class="min-w-[320px]">
+      <!-- VISTA TABLA ANUAL -->
+      <div id="view-pixel-grid" class="bg-white p-4 rounded-3xl border border-[#e2ede7] shadow-xs space-y-2 overflow-x-auto">
+        <div class="min-w-[340px]">
           <div class="grid grid-cols-13 gap-1 text-center text-[10px] font-black text-stone-400 mb-1">
             <div></div>
             <div>J</div><div>F</div><div>M</div><div>A</div><div>M</div><div>J</div>
             <div>J</div><div>A</div><div>S</div><div>O</div><div>N</div><div>D</div>
           </div>
           <div id="pixel-rows" class="space-y-1">
-            </div>
+            <!-- 31 filas generadas por JS -->
+          </div>
         </div>
       </div>
 
+      <!-- VISTA CALENDARIO MENSUAL -->
       <div id="view-calendar-grid" class="hidden space-y-4">
-        </div>
+        <!-- Generado por JS -->
+      </div>
     </section>
 
   </main>
 
+  <!-- MODAL: PINTAR PÍXEL DEL DÍA -->
   <div id="modal-pick-color" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl border border-[#e2ede7]">
       <div class="text-center">
@@ -113,21 +126,23 @@
         <h3 class="text-sm font-black text-stone-800">Selecciona el color del día</h3>
       </div>
       <div id="modal-keys-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
-        </div>
+        <!-- Opciones de colores -->
+      </div>
       <div class="flex justify-between pt-2 border-t border-[#e2ede7]">
-        <button onclick="clearPixelDay()" class="text-xs font-bold text-red-500">Borrar color</button>
-        <button onclick="closeModal('modal-pick-color')" class="px-4 py-1.5 bg-stone-100 rounded-xl text-xs font-bold text-stone-700">Listo</button>
+        <button onclick="clearPixelDay()" class="text-xs font-bold text-red-500 cursor-pointer">Borrar color</button>
+        <button onclick="closeModal('modal-pick-color')" class="px-4 py-1.5 bg-stone-100 rounded-xl text-xs font-bold text-stone-700 cursor-pointer">Listo</button>
       </div>
     </div>
   </div>
 
+  <!-- MODAL: AÑADIR/EDITAR KEY -->
   <div id="modal-key-edit" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl border border-[#e2ede7]">
       <h3 class="text-sm font-black text-stone-800 text-center">Configurar Etiqueta</h3>
       <div class="space-y-3">
         <div>
           <label class="text-[10px] font-black uppercase text-stone-400 block mb-1">Nombre / Rango</label>
-          <input type="text" id="key-input-label" placeholder="Ej. 5k-6k pasos, Alta, etc." class="w-full bg-[#f7faf8] border border-[#e2ede7] rounded-xl px-3 py-2 text-xs font-bold text-stone-800">
+          <input type="text" id="key-input-label" placeholder="Ej. 5k-6k pasos, Alta..." class="w-full bg-[#f7faf8] border border-[#e2ede7] rounded-xl px-3 py-2 text-xs font-bold text-stone-800">
         </div>
         <div>
           <label class="text-[10px] font-black uppercase text-stone-400 block mb-1">Elige un Color</label>
@@ -138,12 +153,13 @@
         </div>
       </div>
       <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="closeModal('modal-key-edit')" class="px-3 py-1.5 text-xs font-bold text-stone-500">Cancelar</button>
-        <button onclick="saveKeyItem()" class="px-4 py-1.5 bg-[#5fa89b] text-white rounded-xl text-xs font-black">Guardar</button>
+        <button onclick="closeModal('modal-key-edit')" class="px-3 py-1.5 text-xs font-bold text-stone-500 cursor-pointer">Cancelar</button>
+        <button onclick="saveKeyItem()" class="px-4 py-1.5 bg-[#5fa89b] text-white rounded-xl text-xs font-black cursor-pointer">Guardar</button>
       </div>
     </div>
   </div>
 
+  <!-- MODAL: NUEVO TRACKER -->
   <div id="modal-new-tracker" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl border border-[#e2ede7]">
       <h3 class="text-sm font-black text-stone-800 text-center">Nuevo Registro</h3>
@@ -152,14 +168,15 @@
         <input type="text" id="new-tracker-name" placeholder="Ej. Pasos, Energía, Agua..." class="w-full bg-[#f7faf8] border border-[#e2ede7] rounded-xl px-3 py-2 text-xs font-bold text-stone-800">
       </div>
       <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="closeModal('modal-new-tracker')" class="px-3 py-1.5 text-xs font-bold text-stone-500">Cancelar</button>
-        <button onclick="createNewTracker()" class="px-4 py-1.5 bg-[#5fa89b] text-white rounded-xl text-xs font-black">Crear</button>
+        <button onclick="closeModal('modal-new-tracker')" class="px-3 py-1.5 text-xs font-bold text-stone-500 cursor-pointer">Cancelar</button>
+        <button onclick="createNewTracker()" class="px-4 py-1.5 bg-[#5fa89b] text-white rounded-xl text-xs font-black cursor-pointer">Crear</button>
       </div>
     </div>
   </div>
 
+  <!-- SCRIPT -->
   <script>
-    const STORAGE_KEY = 'PIXA_YEAR_IN_PIXELS_DATA_V1';
+    const STORAGE_KEY = 'PIXA_YEAR_IN_PIXELS_DATA_V2';
     let currentYear = 2026;
     let currentTrackerId = null;
     let selectedDateForPick = null;
@@ -192,4 +209,303 @@
           id: 3,
           title: "Water log",
           keys: [
-            { id:
+            { id: 1, label: "Little", color: "#d2b4de" },
+            { id: 2, label: "Okay", color: "#7fb3d5" },
+            { id: 3, label: "Very good", color: "#2980b9" }
+          ],
+          years: { 2026: {} }
+        }
+      ]
+    };
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) pixaData = JSON.parse(raw);
+      } catch (e) {}
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(pixaData));
+    }
+
+    function init() {
+      loadData();
+      renderHome();
+      const colorInput = document.getElementById('key-input-color');
+      if(colorInput) {
+        colorInput.addEventListener('input', (e) => {
+          document.getElementById('key-color-hex').innerText = e.target.value;
+        });
+      }
+    }
+
+    function changeYear(delta) {
+      currentYear += delta;
+      document.getElementById('current-year-label').innerText = currentYear;
+      if (currentTrackerId) renderDetail(currentTrackerId);
+    }
+
+    function toggleViewMode() {
+      viewMode = viewMode === 'pixel' ? 'calendar' : 'pixel';
+      document.getElementById('btn-toggle-view').innerText = viewMode === 'pixel' ? '📅' : '🟩';
+      if (viewMode === 'pixel') {
+        document.getElementById('view-pixel-grid').classList.remove('hidden');
+        document.getElementById('view-calendar-grid').classList.add('hidden');
+      } else {
+        document.getElementById('view-pixel-grid').classList.add('hidden');
+        document.getElementById('view-calendar-grid').classList.remove('hidden');
+        renderCalendarView();
+      }
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function renderHome() {
+      document.getElementById('screen-home').classList.remove('hidden');
+      document.getElementById('screen-detail').classList.add('hidden');
+      document.getElementById('btn-back').classList.add('hidden');
+      document.getElementById('btn-toggle-view').classList.add('hidden');
+      document.getElementById('header-title').innerText = "PIXA";
+      currentTrackerId = null;
+
+      const grid = document.getElementById('trackers-grid');
+      grid.innerHTML = '';
+
+      pixaData.trackers.forEach(t => {
+        const yearData = (t.years && t.years[currentYear]) || {};
+        const filledCount = Object.keys(yearData).length;
+
+        grid.innerHTML += `
+          <div onclick="openTracker(${t.id})" class="bg-white p-4 rounded-3xl border border-[#e2ede7] shadow-xs cursor-pointer hover:border-[#5fa89b] transition flex flex-col justify-between h-44">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <h3 class="font-black text-stone-800 text-xs truncate">${t.title}</h3>
+                <span class="text-[10px] font-black text-stone-400">${filledCount}d</span>
+              </div>
+              <p class="text-[10px] font-bold text-stone-400">${t.keys.length} categorías</p>
+            </div>
+            <div class="grid grid-cols-6 gap-1 p-2 bg-[#f7faf8] rounded-2xl">
+              ${t.keys.slice(0, 6).map(k => `<div class="w-full h-3 rounded-md" style="background-color: ${k.color}"></div>`).join('')}
+            </div>
+            <span class="text-[10px] font-extrabold text-[#5fa89b]">Ver año en píxeles ›</span>
+          </div>`;
+      });
+
+      grid.innerHTML += `
+        <div onclick="openNewTrackerModal()" class="border-2 border-dashed border-[#d2e3dc] rounded-3xl flex flex-col items-center justify-center h-44 cursor-pointer hover:bg-white/50 text-stone-400 font-black text-xs gap-1">
+          <span class="text-2xl">+</span>
+          <span>Nuevo Log</span>
+        </div>`;
+    }
+
+    function openNewTrackerModal() {
+      document.getElementById('new-tracker-name').value = '';
+      openModal('modal-new-tracker');
+    }
+
+    function createNewTracker() {
+      const name = document.getElementById('new-tracker-name').value.trim();
+      if (!name) return;
+      const newId = Date.now();
+      pixaData.trackers.push({
+        id: newId,
+        title: name,
+        keys: [
+          { id: 1, label: "Opción 1", color: "#8a4baf" },
+          { id: 2, label: "Opción 2", color: "#49afb9" }
+        ],
+        years: { [currentYear]: {} }
+      });
+      saveData();
+      closeModal('modal-new-tracker');
+      openTracker(newId);
+    }
+
+    function openTracker(id) {
+      currentTrackerId = id;
+      document.getElementById('screen-home').classList.add('hidden');
+      document.getElementById('screen-detail').classList.remove('hidden');
+      document.getElementById('btn-back').classList.remove('hidden');
+      document.getElementById('btn-toggle-view').classList.remove('hidden');
+      renderDetail(id);
+    }
+
+    function goHome() { renderHome(); }
+
+    function renderDetail(id) {
+      const tracker = pixaData.trackers.find(t => t.id === id);
+      if (!tracker) return;
+
+      document.getElementById('header-title').innerText = tracker.title;
+      document.getElementById('detail-title').value = tracker.title;
+
+      const keysContainer = document.getElementById('tracker-keys-container');
+      keysContainer.innerHTML = '';
+      tracker.keys.forEach(k => {
+        keysContainer.innerHTML += `
+          <div class="flex items-center space-x-1.5 bg-white px-2.5 py-1 rounded-xl border border-[#e2ede7] text-xs font-black text-stone-700 shadow-xs">
+            <span class="w-3 h-3 rounded-full" style="background-color: ${k.color}"></span>
+            <span>${k.label}</span>
+            <button onclick="deleteKey(${k.id})" class="text-stone-300 hover:text-red-400 font-bold ml-1 cursor-pointer">×</button>
+          </div>`;
+      });
+
+      const rowsContainer = document.getElementById('pixel-rows');
+      rowsContainer.innerHTML = '';
+
+      if (!tracker.years) tracker.years = {};
+      if (!tracker.years[currentYear]) tracker.years[currentYear] = {};
+      const yearLog = tracker.years[currentYear];
+
+      for (let day = 1; day <= 31; day++) {
+        let rowHtml = `<div class="grid grid-cols-13 gap-1 items-center">`;
+        rowHtml += `<div class="text-[9px] font-black text-stone-400 text-right pr-1">${day}</div>`;
+
+        for (let month = 1; month <= 12; month++) {
+          const daysInMonth = new Date(currentYear, month, 0).getDate();
+          if (day > daysInMonth) {
+            rowHtml += `<div class="pixel-cell opacity-0 pointer-events-none"></div>`;
+          } else {
+            const dateKey = `${month}-${day}`;
+            const color = yearLog[dateKey] || '';
+            const style = color ? `background-color: ${color};` : '';
+            const bgClass = color ? '' : 'pixel-empty';
+
+            rowHtml += `
+              <div onclick="openPickColorModal(${month}, ${day})" 
+                   class="pixel-cell ${bgClass}" 
+                   style="${style}" 
+                   title="${day}/${month}/${currentYear}">
+              </div>`;
+          }
+        }
+        rowHtml += `</div>`;
+        rowsContainer.innerHTML += rowHtml;
+      }
+
+      if (viewMode === 'calendar') renderCalendarView();
+    }
+
+    function updateTrackerTitle(val) {
+      const tracker = pixaData.trackers.find(t => t.id === currentTrackerId);
+      if (tracker && val.trim()) {
+        tracker.title = val.trim();
+        saveData();
+      }
+    }
+
+    function deleteCurrentTracker() {
+      if (confirm("¿Segura que deseas eliminar este log?")) {
+        pixaData.trackers = pixaData.trackers.filter(t => t.id !== currentTrackerId);
+        saveData();
+        goHome();
+      }
+    }
+
+    function openAddKeyModal() {
+      document.getElementById('key-input-label').value = '';
+      openModal('modal-key-edit');
+    }
+
+    function saveKeyItem() {
+      const label = document.getElementById('key-input-label').value.trim();
+      const color = document.getElementById('key-input-color').value;
+      if (!label) return;
+
+      const tracker = pixaData.trackers.find(t => t.id === currentTrackerId);
+      if (tracker) {
+        tracker.keys.push({ id: Date.now(), label, color });
+        saveData();
+        closeModal('modal-key-edit');
+        renderDetail(currentTrackerId);
+      }
+    }
+
+    function deleteKey(keyId) {
+      const tracker = pixaData.trackers.find(t => t.id === currentTrackerId);
+      if (tracker) {
+        tracker.keys = tracker.keys.filter(k => k.id !== keyId);
+        saveData();
+        renderDetail(currentTrackerId);
+      }
+    }
+
+    function openPickColorModal(m, d) {
+      selectedDateForPick = `${m}-${d}`;
+      const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+      document.getElementById('pick-date-label').innerText = `${d} de ${monthNames[m-1]} ${currentYear}`;
+
+      const tracker = pixaData.trackers.find(t => t.id === currentTrackerId);
+      const list = document.getElementById('modal-keys-list');
+      list.innerHTML = '';
+
+      if (tracker.keys.length === 0) {
+        list.innerHTML = `<p class="text-xs text-stone-400 text-center py-2">Agrega primero un color con el botón "+ Color"</p>`;
+      }
+
+      tracker.keys.forEach(k => {
+        list.innerHTML += `
+          <div onclick="applyColorToDay('${k.color}')" class="flex items-center space-x-3 p-2.5 bg-[#f7faf8] hover:bg-stone-100 rounded-2xl cursor-pointer border border-[#e2ede7] transition">
+            <span class="w-5 h-5 rounded-lg shadow-xs" style="background-color: ${k.color}"></span>
+            <span class="text-xs font-black text-stone-800">${k.label}</span>
+          </div>`;
+      });
+
+      openModal('modal-pick-color');
+    }
+
+    function applyColorToDay(color) {
+      const tracker = pixaData.trackers.find(t => t.id === currentTrackerId);
+      if (tracker && selectedDateForPick) {
+        if (!tracker.years[currentYear]) tracker.years[currentYear] = {};
+        tracker.years[currentYear][selectedDateForPick] = color;
+        saveData();
+        closeModal('modal-pick-color');
+        renderDetail(currentTrackerId);
+      }
+    }
+
+    function clearPixelDay() {
+      const tracker = pixaData.trackers.find(t => t.id === currentTrackerId);
+      if (tracker && selectedDateForPick && tracker.years[currentYear]) {
+        delete tracker.years[currentYear][selectedDateForPick];
+        saveData();
+        closeModal('modal-pick-color');
+        renderDetail(currentTrackerId);
+      }
+    }
+
+    function renderCalendarView() {
+      const container = document.getElementById('view-calendar-grid');
+      container.innerHTML = '';
+      const tracker = pixaData.trackers.find(t => t.id === currentTrackerId);
+      const yearLog = (tracker && tracker.years[currentYear]) || {};
+      const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+      for (let m = 1; m <= 12; m++) {
+        const daysInMonth = new Date(currentYear, m, 0).getDate();
+        let daysHtml = '';
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const color = yearLog[`${m}-${d}`] || '';
+          const style = color ? `background-color: ${color}; color: white;` : 'background-color: #f0f5f2; color: #4a5d53;';
+          daysHtml += `
+            <div onclick="openPickColorModal(${m}, ${d})" class="aspect-square rounded-xl flex items-center justify-center text-[11px] font-black cursor-pointer shadow-xs" style="${style}">
+              ${d}
+            </div>`;
+        }
+
+        container.innerHTML += `
+          <div class="bg-white p-4 rounded-3xl border border-[#e2ede7] shadow-xs space-y-2">
+            <h4 class="text-xs font-black text-stone-700">${monthNames[m-1]} ${currentYear}</h4>
+            <div class="grid grid-cols-7 gap-1.5">${daysHtml}</div>
+          </div>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
